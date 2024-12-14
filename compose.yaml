@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - 3333:3333
+  routes-database:
+    image: 'bitnami/postgresql'
+    container_name: routes-database
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/postgresql
+
+volumes:
+  db:

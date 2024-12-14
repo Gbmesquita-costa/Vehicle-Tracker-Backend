@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Route {
+  id            String       @id @default(uuid())
+  name          String
+  sourceId      String?
+  source        Place?       @relation("SourceRoutes", fields: [sourceId], references: [id])
+  destination   Place?       @relation("DestinationRoutes", fields: [destinationId], references: [id])
+  RouteDriver   RouteDriver?
+  destinationId String?
+  distance      Float
+  duration      Float
+  directions    Json
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  @@map("route")
+}
+
+model RouteDriver {
+  id         String   @id @default(uuid())
+  route      Route    @relation(fields: [route_id], references: [id])
+  route_id   String   @unique
+  points     Point[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("route_driver")
+}
+
+model Place {
+  id                String  @id @default(uuid())
+  name              String
+  location          Coord?
+  sourceRoutes      Route[] @relation("SourceRoutes")
+  destinationRoutes Route[] @relation("DestinationRoutes")
+
+  @@map("place")
+}
+
+model Point {
+  id            String       @id @default(uuid())
+  RouteDriver   RouteDriver? @relation(fields: [routeDriverId], references: [id])
+  routeDriverId String?
+  location      Coord?
+  created_at    DateTime     @default(now())
+
+  @@map("point")
+}
+
+model Coord {
+  id String @id @default(uuid())
+
+  lat Float
+  lng Float
+
+  place   Place? @relation(fields: [placeId], references: [id])
+  placeId String @unique
+
+  point   Point? @relation(fields: [pointId], references: [id])
+  pointId String @unique
+
+  @@map("coord")
+}
